@@ -31,12 +31,18 @@ def getSchedulePage(year, quarter, major, campus = "S"):
 
     baseURL = "https://www.washington.edu/students/timeschd/"
 
-    if campus != "S":
+    if campus == "B" or campus == "T":
         baseURL +=  campus + "/"
+    elif campus != "S":
+        raise InvalidCampus
+
+    if quarter not in ["SPR", "SUM", "AUT", "WIN"]:
+        raise InvalidQuarter
 
     baseURL += "%s%s/%s.html" % (quarter, year, major)
 
-    return BeautifulSoup(requests.get(baseURL).content)
+    headers = {"User-Agent": "UW Courselist Scraper"}
+    return BeautifulSoup(requests.get(baseURL, headers=headers).content)
 
 def parseLine(line):
     """Parses a single line from the schedule and returns the output in a dict.
@@ -106,7 +112,47 @@ def getSchedule(year, quarter, major, campus = "S"):
                 out.append(line)
     return out
 
+def getMajors(year, quarter, campus="S"):
+    """Gets a list of majors and their schedule for the specified year and
+    quarter.
+
+    @param  year    The year to get and parse. ie 2014
+    @param  quarter The quarter to get and parse. Available options are "SPR",
+    "SUM", "AUT" and "WIN"
+    @param  campus  The campus to get the list of majors from. "S" for Seattle
+    (default), "B" for Bothell or "T" for Tacoma.
+
+    @return A dictionary of majors and their schedule for that quarter
+    """
+
+    output = {}
+    if campus == "B":
+        url = "https://www.washington.edu/students/crscatb/"
+        soup = BeautifulSoup(requests.get(url).content)
+        for a in soup.find_all("a")[15:71]:
+            if "href" in a.attrs:
+                major = a.attrs['href'].split(".")[0]
+                output[major] = getSchedule(year, quarter, major, campus)
+
+    elif campus == "S":
+        raise CampusNotSupported
+    elif campus == "T":
+        raise CampusNotSupported
+    else:
+        raise InvalidCampus
+    return output
+
+class CampusNotSupported(Exception):
+    pass
+
+class InvalidCampus(Exception):
+    pass
+
+class InvalidQuarter(Exception):
+    pass
+
+
 if __name__ == "__main__":
-    print json.dumps(getSchedule(2014, "SPR", "css", "B"))
+    print json.dumps(getMajors(2014, "SPR", "B"))
 
 # vim: set textwidth=79
