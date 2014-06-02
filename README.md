@@ -1,6 +1,8 @@
 UWCourseScraper
 ===============
 
+[![Code Health](https://landscape.io/github/thefinn93/UWCourseScraper/master/landscape.png)](https://landscape.io/github/thefinn93/UWCourseScraper/master)
+
 A scraper for the University of Washington's horrible course listing's pages.
 Mostly written during a class.
 
