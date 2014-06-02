@@ -57,7 +57,7 @@ def parseLine(line):
         output['SLN'] = line[7:13].strip()
         output['section'] = line[14]
         output['credit'] = line[15:23].strip()
-        if not "to be arranged" in line[24:56]:
+        if "to be arranged" not in line[24:56]:
             output['meetings'] = {}
             output['meetings']['day'] = line[24:31].strip()
             output['meetings']['time'] = line[31:41].strip()
